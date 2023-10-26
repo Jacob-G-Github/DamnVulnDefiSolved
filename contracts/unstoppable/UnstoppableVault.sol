@@ -92,6 +92,14 @@ contract UnstoppableVault is IERC3156FlashLender, ReentrancyGuard, Owned, ERC462
     ) external returns (bool) {
         if (amount == 0) revert InvalidAmount(0); // fail early
         if (address(asset) != _token) revert UnsupportedCurrency(); // enforce ERC3156 requirement
+
+        //TODO:send money -> breaks -> we win 
+////    ///
+///
+////////
+///////
+////////
+//////
         uint256 balanceBefore = totalAssets();
         if (convertToShares(totalSupply) != balanceBefore) revert InvalidBalance(); // enforce ERC4626 requirement
         uint256 fee = flashFee(_token, amount);

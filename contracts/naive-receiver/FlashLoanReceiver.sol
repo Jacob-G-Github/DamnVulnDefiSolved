@@ -39,6 +39,7 @@ contract FlashLoanReceiver is IERC3156FlashBorrower {
             revert UnsupportedCurrency();
         
         uint256 amountToBeRepaid;
+       //TODO: unchecked = can be overflowed. Maybe if we request the max about it will flip around and make us repay zero
         unchecked {
             amountToBeRepaid = amount + fee;
         }
