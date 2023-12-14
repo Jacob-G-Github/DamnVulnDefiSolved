@@ -108,7 +108,6 @@ describe('[Challenge] Puppet', function () {
         await attackerContract.attackPuppet({value: PLAYER_INITIAL_ETH_BALANCE});
         test = await token.balanceOf(player.address);
         console.log(test,POOL_INITIAL_TOKEN_BALANCE);
-        
     });
 
     after(async function () {
