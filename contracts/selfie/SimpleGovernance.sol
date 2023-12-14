@@ -31,7 +31,7 @@ contract SimpleGovernance is ISimpleGovernance {
             revert TargetMustHaveCode();
 
         actionId = _actionCounter;
-
+//note target and value in different positions from interface struct, is this releveant?
         _actions[actionId] = GovernanceAction({
             target: target,
             value: value,
@@ -102,7 +102,7 @@ contract SimpleGovernance is ISimpleGovernance {
 
         return actionToExecute.executedAt == 0 && timeDelta >= ACTION_DELAY_IN_SECONDS;
     }
-
+    //how can i get governance token??
     function _hasEnoughVotes(address who) private view returns (bool) {
         uint256 balance = _governanceToken.getBalanceAtLastSnapshot(who);
         uint256 halfTotalSupply = _governanceToken.getTotalSupplyAtLastSnapshot() / 2;
