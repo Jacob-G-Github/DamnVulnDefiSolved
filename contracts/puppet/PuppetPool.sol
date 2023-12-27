@@ -56,6 +56,7 @@ contract PuppetPool is ReentrancyGuard {
     function calculateDepositRequired(uint256 amount) public view returns (uint256) {
         return amount * _computeOraclePrice() * DEPOSIT_FACTOR / 10 ** 18;
     }
+    ///
     //I'm guessing if send a bunch of eth or DVT to the uniswap contract we can make one of them worth significantly less and take them out - or continous swaps due to precision loss (rounding down as solidity does not do floats)
     function _computeOraclePrice() private view returns (uint256) {
         // calculates the price of the token in wei according to Uniswap pair
