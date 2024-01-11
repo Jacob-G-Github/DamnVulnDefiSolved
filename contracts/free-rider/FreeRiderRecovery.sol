@@ -33,6 +33,8 @@ contract FreeRiderRecovery is ReentrancyGuard, IERC721Receiver {
     }
 
     // Read https://eips.ethereum.org/EIPS/eip-721 for more info on this function
+    //if we somehow call this function from the nft contract and make it through the loops we can pass in ourselves as the recipient of prize
+    //Wait this is the prize contract we have to send the NFTs to after - unlikely that we exploit this?
     function onERC721Received(address, address, uint256 _tokenId, bytes memory _data)
         external
         override
@@ -41,7 +43,7 @@ contract FreeRiderRecovery is ReentrancyGuard, IERC721Receiver {
     {
         if (msg.sender != address(nft))
             revert CallerNotNFT();
-
+    // beneficiary is player
         if (tx.origin != beneficiary)
             revert OriginNotBeneficiary();
 

