@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 import "solady/src/utils/SafeTransferLib.sol";
 
+//can probably implement our own code, as we never initialize the interface 
 interface IFlashLoanEtherReceiver {
     function execute() external payable;
 }
@@ -29,7 +30,7 @@ contract SideEntranceLenderPool {
 
     function withdraw() external {
         uint256 amount = balances[msg.sender];
-        
+        //this is ok
         delete balances[msg.sender];
         emit Withdraw(msg.sender, amount);
 

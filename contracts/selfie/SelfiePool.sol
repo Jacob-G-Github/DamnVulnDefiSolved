@@ -24,6 +24,7 @@ contract SelfiePool is ReentrancyGuard, IERC3156FlashLender {
 
     event FundsDrained(address indexed receiver, uint256 amount);
 
+    //Governance address is address of simple governance contract - how can we make the governance contract send the emergency exit request, and route the money to us? or approve us for to token transferfrom on the governance contract?
     modifier onlyGovernance() {
         if (msg.sender != address(governance))
             revert CallerNotGovernance();
@@ -57,19 +58,20 @@ contract SelfiePool is ReentrancyGuard, IERC3156FlashLender {
             revert UnsupportedCurrency();
 
         token.transfer(address(_receiver), _amount);
+        //One could likely beat this by building our own receiver as IERC3156FlashBorrower, overriding onflashloan function, and making it always return "callback success"
         if (_receiver.onFlashLoan(msg.sender, _token, _amount, 0, _data) != CALLBACK_SUCCESS)
             revert CallbackFailed();
-
+        //this is going to attempt to transfer back amount as it assumes we have approved the token to be transfered back to pool.
         if (!token.transferFrom(address(_receiver), address(this), _amount))
             revert RepayFailed();
         
         return true;
     }
-
+        //probably dont have to break flash loan -> but probably have to break this. Governance token is the same token that is flash loaned
     function emergencyExit(address receiver) external onlyGovernance {
         uint256 amount = token.balanceOf(address(this));
         token.transfer(receiver, amount);
-
+        
         emit FundsDrained(receiver, amount);
     }
 }

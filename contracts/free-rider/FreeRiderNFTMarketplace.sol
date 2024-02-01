@@ -38,7 +38,7 @@ contract FreeRiderNFTMarketplace is ReentrancyGuard {
         }
         token = _token;
     }
-
+    //does this function not validate the tokenIds?
     function offerMany(uint256[] calldata tokenIds, uint256[] calldata prices) external nonReentrant {
         uint256 amount = tokenIds.length;
         if (amount == 0)
@@ -89,7 +89,7 @@ contract FreeRiderNFTMarketplace is ReentrancyGuard {
         uint256 priceToPay = offers[tokenId];
         if (priceToPay == 0)
             revert TokenNotOffered(tokenId);
-
+        //Price to pay is only for one NFT - buyMany breaks
         if (msg.value < priceToPay)
             revert InsufficientPayment();
 
@@ -97,9 +97,11 @@ contract FreeRiderNFTMarketplace is ReentrancyGuard {
 
         // transfer from seller to buyer
         DamnValuableNFT _token = token; // cache for gas savings
-        _token.safeTransferFrom(_token.ownerOf(tokenId), msg.sender, tokenId);
+        _token.safeTransferFrom(_token.ownerOf(tokenId), msg.sender, tokenId); //this does infact change the owner to the msg.sender
 
         // pay seller using cached token
+        //token.ownerOf(tokenId) references _owner[tokenID] array in ERC721 contract for NFTs 
+    //@audit this is sending the money to the new owner not the old- we can just keep rebuying and getting our money back. we need more ETH. Maybe uniswapv2 flashswap?
         payable(_token.ownerOf(tokenId)).sendValue(priceToPay);
 
         emit NFTBought(msg.sender, tokenId, priceToPay);

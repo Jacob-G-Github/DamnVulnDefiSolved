@@ -25,7 +25,7 @@ contract PuppetV2Pool {
     mapping(address => uint256) public deposits;
 
     event Borrowed(address indexed borrower, uint256 depositRequired, uint256 borrowAmount, uint256 timestamp);
-
+    //@audit public constructor??
     constructor(address wethAddress, address tokenAddress, address uniswapPairAddress, address uniswapFactoryAddress)
         public
     {
@@ -40,16 +40,18 @@ contract PuppetV2Pool {
      *         Sender must have approved enough WETH in advance.
      *         Calculations assume that WETH and borrowed token have same amount of decimals.
      */
+     //@audit could be re-entrancy? - unlikely, follows CEI
     function borrow(uint256 borrowAmount) external {
         // Calculate how much WETH the user must deposit
         uint256 amount = calculateDepositOfWETHRequired(borrowAmount);
 
         // Take the WETH
+        //@audit not checking return value
         _weth.transferFrom(msg.sender, address(this), amount);
 
         // internal accounting
         deposits[msg.sender] += amount;
-
+       
         require(_token.transfer(msg.sender, borrowAmount), "Transfer failed");
 
         emit Borrowed(msg.sender, amount, borrowAmount, block.timestamp);
@@ -61,6 +63,7 @@ contract PuppetV2Pool {
     }
 
     // Fetch the price from Uniswap v2 using the official libraries
+    //@audit vulnerable to price manipulation
     function _getOracleQuote(uint256 amount) private view returns (uint256) {
         (uint256 reservesWETH, uint256 reservesToken) =
             UniswapV2Library.getReserves(_uniswapFactory, address(_weth), address(_token));

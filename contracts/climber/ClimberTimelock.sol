@@ -67,6 +67,7 @@ contract ClimberTimelock is ClimberTimelockBase {
     /**
      * Anyone can execute what's been scheduled via `schedule`
      */
+     //inproper CEI -> Checking operation state is ready to execute after allowing us to run function call -> re-entrancy
     function execute(address[] calldata targets, uint256[] calldata values, bytes[] calldata dataElements, bytes32 salt)
         external
         payable
@@ -86,6 +87,7 @@ contract ClimberTimelock is ClimberTimelockBase {
         bytes32 id = getOperationId(targets, values, dataElements, salt);
 
         for (uint8 i = 0; i < targets.length;) {
+            //this is from OZ Address Library -> is essentially just a call and "with value" means it passes wei https://docs.openzeppelin.com/contracts/3.x/api/utils#Address-functionCallWithValue-address-bytes-uint256-
             targets[i].functionCallWithValue(dataElements[i], values[i]);
             unchecked {
                 ++i;
@@ -98,7 +100,7 @@ contract ClimberTimelock is ClimberTimelockBase {
 
         operations[id].executed = true;
     }
-
+    //this allows us to update delay via execute function
     function updateDelay(uint64 newDelay) external {
         if (msg.sender != address(this)) {
             revert CallerNotTimelock();

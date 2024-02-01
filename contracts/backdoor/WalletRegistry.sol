@@ -43,6 +43,7 @@ contract WalletRegistry is IProxyCreationCallback, Ownable {
         address tokenAddress,
         address[] memory initialBeneficiaries
     ) {
+        //
         _initializeOwner(msg.sender);
 
         masterCopy = masterCopyAddress;
@@ -83,7 +84,6 @@ contract WalletRegistry is IProxyCreationCallback, Ownable {
         if (singleton != masterCopy) {
             revert FakeMasterCopy();
         }
-
         // Ensure initial calldata was a call to `GnosisSafe::setup`
         if (bytes4(initializer[:4]) != GnosisSafe.setup.selector) {
             revert InvalidInitialization();
@@ -108,7 +108,7 @@ contract WalletRegistry is IProxyCreationCallback, Ownable {
         if (!beneficiaries[walletOwner]) {
             revert OwnerIsNotABeneficiary();
         }
-
+        //This is a check that the fallback manager has to be address(0) -> I'm guessing in order to ensure that there is no backdoor via the fallback manager
         address fallbackManager = _getFallbackManager(walletAddress);
         if (fallbackManager != address(0))
             revert InvalidFallbackManager(fallbackManager);

@@ -46,6 +46,10 @@ describe('[Challenge] Backdoor', function () {
 
     it('Execution', async function () {
         /** CODE YOUR SOLUTION HERE */
+        //Since our malicious code is done via the constructor, all we need to do is deploy
+        const BackdoorAttack = await ethers.getContractFactory("BackdoorAttack", player);
+        attackerContract = await BackdoorAttack.deploy(walletRegistry.address, users);
+
     });
 
     after(async function () {
